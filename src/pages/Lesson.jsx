@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
-import {  ArrowRightCircle } from 'lucide-react'
+import { ArrowRightCircle } from 'lucide-react'
 
 const Lesson = () => {
   const { id } = useParams()
@@ -105,23 +105,27 @@ const Lesson = () => {
   const lesson = lessonContent[id] || { title: `Lesson ${id}`, sections: [{ heading: 'Coming Soon', text: 'Lesson not available yet.' }] }
 
   return (
-    <div className="p-8 min-h-screen w-339 bg-gray-100 mx-auto items-center justify-center">
-      <h2 className="text-3xl font-bold text-center mb-6 text-blue-700">{lesson.title}</h2>
+    <div className="p-6 sm:p-8 min-h-screen min-w-screen bg-gray-100 flex flex-col items-center">
+      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 text-blue-700 max-w-xl">{lesson.title}</h2>
       
       {lesson.sections.map((section, index) => (
-        <div key={index} className="mx-auto w-1/2 mb-6 bg-white p-4 rounded shadow">
-          <h3 className="text-xl font-semibold mb-2 text-green-600">{section.heading}</h3>
-          <pre className="whitespace-pre-wrap text-gray-800">{section.text}</pre>
+        <div 
+          key={index} 
+          className="w-full sm:w-3/4 md:w-2/3 lg:w-1/2 mb-6 bg-white p-4 rounded shadow"
+        >
+          <h3 className="text-lg sm:text-xl font-semibold mb-2 text-green-600">{section.heading}</h3>
+          <pre className="whitespace-pre-wrap text-gray-800 text-sm sm:text-base">{section.text}</pre>
         </div>
       ))}
 
       <div className="mt-8 text-center">
-        <Link 
-          to={`/activity/${id}`}
-          className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 !text-white font-semibold px-5 py-2.5 rounded-lg transition duration-200"
-        >
-          Take Activity <ArrowRightCircle className="w-5 h-5" />
-        </Link>
+       <Link 
+  to={`/activity/${id}`}
+  className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 font-semibold px-5 py-3 rounded-lg"
+>
+  <span className='text-white'>Take Activity</span> <ArrowRightCircle className="w-5 h-5 text-white" />
+</Link>
+
       </div>
     </div>
   )

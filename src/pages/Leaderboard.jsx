@@ -7,7 +7,10 @@ import { useNavigate } from 'react-router-dom';
 const Leaderboard = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userRank, setUserRank] = useState(null);
   const navigate = useNavigate();
+
+  const currentUsername = localStorage.getItem('username');
 
   useEffect(() => {
     const leaderboardRef = ref(database, 'leaderboard');
@@ -25,14 +28,12 @@ const Leaderboard = () => {
 
         let results = [];
 
-        // Handle both object or array data shape
         if (typeof data === 'object' && !Array.isArray(data)) {
           results = Object.values(data);
         } else if (Array.isArray(data)) {
           results = data;
         }
 
-        // Normalize fields & filter
         results = results
           .map(user => ({
             name: user.name || user.username || 'Unknown',
@@ -40,10 +41,20 @@ const Leaderboard = () => {
           }))
           .filter(user => user.score > 0);
 
-        // Sort descending by score
         results.sort((a, b) => b.score - a.score);
-
         setUsers(results);
+
+        // Get the current user's rank (1-based index)
+        const foundIndex = results.findIndex(
+          user => user.name.toLowerCase() === currentUsername?.toLowerCase()
+        );
+
+        if (foundIndex !== -1) {
+          setUserRank(foundIndex + 1);
+        } else {
+          setUserRank(null);
+        }
+
         setLoading(false);
       },
       (error) => {
@@ -54,7 +65,7 @@ const Leaderboard = () => {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [currentUsername]);
 
   const getMedal = (rank) => {
     if (rank === 1) return '🥇';
@@ -74,7 +85,6 @@ const Leaderboard = () => {
   return (
     <div className="min-h-screen min-w-screen bg-gray-100 flex items-center justify-center p-6">
       <div className="bg-white rounded-2xl shadow-lg p-8 max-w-xl w-full relative">
-        {/* Back Button */}
         <button
           onClick={() => navigate('/')}
           className="absolute top-6 left-6 text-green-600 hover:text-green-800 transition"
@@ -120,6 +130,14 @@ const Leaderboard = () => {
             </p>
           </div>
         </div>
+
+        {userRank && (
+          <div className="mt-6 text-center">
+            <p className="text-base text-gray-700 font-medium">
+              🔢 You are ranked <span className="font-bold text-blue-700">#{userRank}</span> out of {users.length} players.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

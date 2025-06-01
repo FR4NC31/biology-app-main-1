@@ -1,6 +1,5 @@
 import { useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import clsx from 'clsx'
 import { database } from '../../firebaseConfig'
 import { ref, push } from 'firebase/database'
 
@@ -37,15 +36,14 @@ const Activity = () => {
     ],
   }[id]
 
- useEffect(() => {
-  const savedUsername = localStorage.getItem('username')
-  if (savedUsername) {
-    setUsername(savedUsername)
-  } else {
-    alert('No username found. Please log in.')
-    // Optional: redirect to login page
-  }
-}, [])
+  useEffect(() => {
+    const savedUsername = localStorage.getItem('username')
+    if (savedUsername) {
+      setUsername(savedUsername)
+    } else {
+      alert('No username found. Please log in.')
+    }
+  }, [])
 
   const handleSubmit = async () => {
     if (selected == null) return
@@ -80,50 +78,69 @@ const Activity = () => {
     }
   }
 
-  const getTileColor = (option) => {
-    if (!submitted) return 'bg-blue-500 hover:bg-blue-600'
-    if (option === quizList[current].correct) return 'bg-green-500'
-    if (option === selected) return 'bg-red-500'
-    return 'bg-gray-300'
-  }
+    return (
+    <div className="min-h-screen min-w-screen bg-gray-100 flex items-center justify-center px-4 py-8">
+      <div className="bg-white p-6 sm:p-10 rounded-2xl shadow-xl w-full max-w-3xl text-center">
+        <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 text-blue-700">
+          Quiz Activity - Lesson {id}
+        </h2>
+        <p className="mb-6 text-gray-600 text-sm sm:text-base">
+          👤 Logged in as: <span className="font-bold">{username}</span>
+        </p>
 
-  return (
-    <div className="p-8 max-w-2xl mx-auto text-center">
-      <h2 className="text-3xl font-extrabold mb-6 text-blue-700">Quiz Activity - Lesson {id}</h2>
-      <p className="mb-4 text-gray-600">👤 Logged in as: <span className="font-bold">{username}</span></p>
-
-      {!finished ? (
-        <>
-          <p className="text-xl font-semibold mb-6">{quizList[current].question}</p>
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            {quizList[current].options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => !submitted && setSelected(option)}
-                className={clsx(
-                  'text-white p-4 rounded-xl transition duration-200 font-medium shadow-lg',
-                  selected === option && !submitted && 'ring-4 ring-yellow-300',
-                  getTileColor(option)
-                )}
-              >
-                {option}
-              </button>
-            ))}
+        {!finished ? (
+          <>
+            <p className="text-lg text-black sm:text-xl font-semibold mb-6">
+              {quizList[current].question}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {quizList[current].options.map((option, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                  if (!submitted) {
+                    setSelected(option)
+                    setSubmitted(true)
+                    if (option === quizList[current].correct) {
+                      setScore((prev) => prev + 2)
+                    }
+                  }
+                }}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={handleSubmit}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-bold transition duration-200 text-sm sm:text-base"
+            >
+              {submitted
+                ? current === quizList.length - 1
+                  ? 'Finish Quiz'
+                  : 'Next Question'
+                : 'Submit Answer'}
+            </button>
+          </>
+        ) : (
+          <div className="mt-10 text-center space-y-4">
+            <p className="text-xl sm:text-2xl font-bold text-green-700">🎉 Quiz Completed!</p>
+            <p className="text-lg sm:text-xl">
+              Your Score: <span className="font-bold text-black mr-30">{score} / {quizList.length * 2}</span>
+            </p>
+            <p>
+               <span className="font-semibold text-gray-700">🏅 Player:</span>{' '}
+                <span className="text-blue-700 font-bold">{username}</span>
+            </p>
+            <button
+              onClick={() => window.location.href = '/leaderboard'}
+              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold transition duration-200 text-sm sm:text-base"
+            >
+              View Leaderboard
+            </button>
           </div>
-          <button
-            onClick={handleSubmit}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-bold transition duration-200"
-          >
-            {submitted ? (current === quizList.length - 1 ? 'Finish Quiz' : 'Next Question') : 'Submit Answer'}
-          </button>
-        </>
-      ) : (
-        <div className="mt-10">
-          <p className="text-2xl font-bold text-green-700">🎉 Quiz Completed!</p>
-          <p className="text-xl mt-4">Your Score: <span className="font-bold">{score} / {quizList.length * 2}</span></p>
-          <p className="mt-2">🏅 Player: <span className="text-yellow-600 font-semibold">{username}</span></p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
