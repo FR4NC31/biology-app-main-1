@@ -11,6 +11,7 @@ const Activity = () => {
   const [score, setScore] = useState(0)
   const [finished, setFinished] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [showAnswers, setShowAnswers] = useState(false)
 
   const quizList = {
     1: [
@@ -78,13 +79,13 @@ const Activity = () => {
     }
   }
 
-    return (
+  return (
     <div className="min-h-screen min-w-screen bg-gray-100 flex items-center justify-center px-4 py-8">
       <div className="bg-white p-6 sm:p-10 rounded-2xl shadow-xl w-full max-w-3xl text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 text-blue-700">
           Quiz Activity - Lesson {id}
         </h2>
-        <p className="mb-6 text-gray-600 text-sm sm:text-base">
+        <p className="mb-6 text-black text-sm sm:text-base">
           👤 Logged in as: <span className="font-bold">{username}</span>
         </p>
 
@@ -98,14 +99,17 @@ const Activity = () => {
                 <button
                   key={index}
                   onClick={() => {
-                  if (!submitted) {
-                    setSelected(option)
-                    setSubmitted(true)
-                    if (option === quizList[current].correct) {
-                      setScore((prev) => prev + 2)
+                    if (!submitted) {
+                      setSelected(option)
+                      setSubmitted(true)
+                      if (option === quizList[current].correct) {
+                        setScore((prev) => prev + 2)
+                      }
                     }
-                  }
-                }}
+                  }}
+                  className={`py-3 px-6 rounded-xl font-semibold border text-white bg- black hover:bg-blue-100 transition duration-200 ${
+                    selected === option ? 'bg-blue-500 text-white' : ''
+                  }`}
                 >
                   {option}
                 </button>
@@ -126,18 +130,42 @@ const Activity = () => {
           <div className="mt-10 text-center space-y-4">
             <p className="text-xl sm:text-2xl font-bold text-green-700">🎉 Quiz Completed!</p>
             <p className="text-lg sm:text-xl">
-              Your Score: <span className="font-bold text-black mr-30">{score} / {quizList.length * 2}</span>
+              Your Score: <span className="font-bold text-black">{score} / {quizList.length * 2}</span>
             </p>
             <p>
-               <span className="font-semibold text-gray-700">🏅 Player:</span>{' '}
-                <span className="text-blue-700 font-bold">{username}</span>
+              <span className="font-semibold text-gray-700">🏅 Player:</span>{' '}
+              <span className="text-blue-700 font-bold">{username}</span>
             </p>
-            <button
-              onClick={() => window.location.href = '/leaderboard'}
-              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold transition duration-200 text-sm sm:text-base"
-            >
-              View Leaderboard
-            </button>
+
+            <div className="flex justify-center gap-4 flex-wrap">
+              <button
+                onClick={() => window.location.href = '/leaderboard'}
+                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold transition duration-200 text-sm sm:text-base"
+              >
+                View Leaderboard
+              </button>
+
+              <button
+                onClick={() => setShowAnswers(!showAnswers)}
+                className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full font-bold transition duration-200 text-sm sm:text-base"
+              >
+                {showAnswers ? 'Hide Answers' : 'Show Correct Answers'}
+              </button>
+            </div>
+
+            {showAnswers && (
+              <div className="mt-6 text-left bg-gray-50 border border-gray-200 p-4 rounded-xl max-w-xl mx-auto">
+                <h3 className="text-lg font-bold mb-2 text-gray-800">✔️ Correct Answers:</h3>
+                <ul className="space-y-2 text-gray-700 text-sm sm:text-base">
+                  {quizList.map((q, i) => (
+                    <li key={i}>
+                      <strong>Q{i + 1}:</strong> {q.question}<br />
+                      <span className="ml-4 text-green-700">Correct Answer: {q.correct}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </div>
