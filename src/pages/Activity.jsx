@@ -1,120 +1,148 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { BookOpen, Trophy } from 'lucide-react';
-import { database } from '../../firebaseConfig';
-import { ref, set, get } from 'firebase/database';
+import { useParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { database } from '../../firebaseConfig'
+import { ref, push } from 'firebase/database'
 
-const Home = () => {
-  const [username, setUsername] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [animateModal, setAnimateModal] = useState(false);
-  const [loggedInUser, setLoggedInUser] = useState('');
+const Activity = () => {
+  const { id } = useParams()
+  const [username, setUsername] = useState('')
+  const [current, setCurrent] = useState(0)
+  const [selected, setSelected] = useState(null)
+  const [score, setScore] = useState(0)
+  const [finished, setFinished] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+
+  const quizList = {
+    1: [
+      { question: 'What is the basic unit of life?', options: ['Atom', 'Cell', 'Tissue', 'Organelle'], correct: 'Cell' },
+      { question: 'Which type of cell does not have a nucleus?', options: ['Plant cell', 'Animal cell', 'Eukaryotic cell', 'Prokaryotic cell'], correct: 'Prokaryotic cell' },
+      { question: 'What is the function of the mitochondria?', options: ['Store genetic material', 'Produce energy', 'Digest food', 'Make proteins'], correct: 'Produce energy' },
+      { question: 'Where is DNA found in a eukaryotic cell?', options: ['Cytoplasm', 'Cell membrane', 'Nucleus', 'Ribosomes'], correct: 'Nucleus' },
+      { question: 'Which organelle is responsible for photosynthesis?', options: ['Ribosomes', 'Mitochondria', 'Chloroplast', 'Golgi body'], correct: 'Chloroplast' },
+    ],
+    2: [
+      { question: 'Who is known as the Father of Modern Genetics?', options: ['Charles Darwin', 'Louis Pasteur', 'Gregor Mendel', 'Rosalind Franklin'], correct: 'Gregor Mendel' },
+      { question: 'What is the genetic material that carries instructions for life?', options: ['RNA', 'Protein', 'Carbohydrates', 'DNA'], correct: 'DNA' },
+      { question: 'Which describes a dominant allele?', options: ['Only shows effect when two copies are present', 'Is weaker than a recessive allele', 'Shows effect even if only one copy is present', 'Only appears in males'], correct: 'Shows effect even if only one copy is present' },
+      { question: 'What tool is used to predict genetic outcomes?', options: ['Microscope', 'Gene scanner', 'Punnett Square', 'Chromosome map'], correct: 'Punnett Square' },
+      { question: 'What combination of sex chromosomes does a male have?', options: ['XX', 'XY', 'YY', 'XO'], correct: 'XY' },
+    ],
+    3: [
+      { question: 'What is heredity?', options: ['Cell division', 'The passing of traits from parents to offspring', 'Mutation of genes', 'Growth of an organism'], correct: 'The passing of traits from parents to offspring' },
+      { question: 'Which molecule carries genetic information?', options: ['RNA', 'ATP', 'DNA', 'Protein'], correct: 'DNA' },
+      { question: 'Who discovered the basic principles of heredity?', options: ['Isaac Newton', 'Gregor Mendel', 'Albert Einstein', 'Louis Pasteur'], correct: 'Gregor Mendel' },
+      { question: 'What term describes a trait influenced by multiple genes?', options: ['Dominant trait', 'Recessive trait', 'Polygenic trait', 'Single-gene trait'], correct: 'Polygenic trait' },
+      { question: 'Which of the following is a hereditary disorder?', options: ['Flu', 'Diabetes Type 2', 'Cystic Fibrosis', 'Allergy'], correct: 'Cystic Fibrosis' },
+    ],
+  }[id]
 
   useEffect(() => {
-    const savedUsername = localStorage.getItem('username');
+    const savedUsername = localStorage.getItem('username')
     if (savedUsername) {
-      setLoggedInUser(savedUsername);
+      setUsername(savedUsername)
     } else {
-      openModal();
+      alert('No username found. Please log in.')
     }
-  }, []);
-
-  const openModal = () => {
-    setShowModal(true);
-    setTimeout(() => setAnimateModal(true), 10); // delay for transition
-  };
-
-  const closeModal = () => {
-    setAnimateModal(false);
-    setTimeout(() => setShowModal(false), 300); // match transition duration
-  };
+  }, [])
 
   const handleSubmit = async () => {
-    if (!username.trim()) return;
-    try {
-      const userRef = ref(database, 'users/' + username);
-      const snapshot = await get(userRef);
-      if (!snapshot.exists()) {
-        await set(userRef, { username, points: 0 });
+    if (selected == null) return
+
+    if (!submitted) {
+      setSubmitted(true)
+      if (selected === quizList[current].correct) {
+        setScore((prev) => prev + 2)
       }
-      localStorage.setItem('username', username);
-      setLoggedInUser(username);
-      closeModal();
-    } catch (error) {
-      console.error('Error saving user:', error);
+    } else {
+      if (current + 1 < quizList.length) {
+        setCurrent(current + 1)
+        setSelected(null)
+        setSubmitted(false)
+      } else {
+        setFinished(true)
+
+        if (username) {
+          try {
+            await push(ref(database, 'leaderboard'), {
+              username,
+              points: score,
+              lessonId: id,
+              timestamp: new Date().toISOString()
+            })
+            console.log('Score saved to leaderboard.')
+          } catch (error) {
+            console.error('Error saving score:', error)
+          }
+        }
+      }
     }
-  };
+  }
 
-  const handleLogout = () => {
-    localStorage.removeItem('username');
-    setLoggedInUser('');
-    setUsername('');
-    openModal();
-  };
-
-  return (
-    <div className="min-h-screen min-w-screen bg-gradient-to-b from-green-100 to-white flex flex-col items-center justify-center p-4 relative">
-      <button
-        onClick={loggedInUser ? handleLogout : openModal}
-        className="absolute top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-      >
-        {loggedInUser ? 'Logout' : 'Login'}
-      </button>
-
-      {/* Modal with transition */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div
-            className={`bg-white text-black rounded-lg p-6 shadow-xl w-80 transform transition-all duration-300 ease-in-out
-              ${animateModal ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}
-            `}
-          >
-            <h2 className="text-lg font-bold mb-4 text-center text-green-700">Enter Your Username</h2>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g., BioMaster123"
-              className="w-full p-2 border border-gray-300 rounded mb-4"
-            />
-            <div className="flex justify-between">
-              <button
-                onClick={handleSubmit}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-              >
-                Submit
-              </button>
-              <button
-                onClick={closeModal}
-                className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main Content */}
-      <div className="bg-white shadow-2xl rounded-2xl p-8 max-w-xl w-full">
-        <h1 className="text-4xl font-bold text-green-700 mb-4 text-center">🌱 Gamified Biology</h1>
-        {loggedInUser && (
-          <p className="text-xl text-gray-700 text-center mb-6">
-            Hello, <span className="font-bold text-green-800">{loggedInUser}</span>!
-          </p>
-        )}
-        <p className="text-gray-700 mb-6 text-center">
-          Choose a lesson to start learning and earning points!
+    return (
+    <div className="min-h-screen min-w-screen bg-gray-100 flex items-center justify-center px-4 py-8">
+      <div className="bg-white p-6 sm:p-10 rounded-2xl shadow-xl w-full max-w-3xl text-center">
+        <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 text-blue-700">
+          Quiz Activity - Lesson {id}
+        </h2>
+        <p className="mb-6 text-gray-600 text-sm sm:text-base">
+          👤 Logged in as: <span className="font-bold">{username}</span>
         </p>
-        <ul className="space-y-4">
-          <li><Link to="/lesson/1" className="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-3 rounded-lg font-medium transition duration-200"><BookOpen className="w-5 h-5" />Lesson 1: Cells</Link></li>
-          <li><Link to="/lesson/2" className="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-3 rounded-lg font-medium transition duration-200"><BookOpen className="w-5 h-5" />Lesson 2: Genetics</Link></li>
-          <li><Link to="/lesson/3" className="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-3 rounded-lg font-medium transition duration-200"><BookOpen className="w-5 h-5" />Lesson 3: Heredity</Link></li>
-          <li><Link to="/leaderboard" className="flex items-center gap-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-4 py-3 rounded-lg font-medium transition duration-200"><Trophy className="w-5 h-5" />View Leaderboard</Link></li>
-        </ul>
+
+        {!finished ? (
+          <>
+            <p className="text-lg text-black sm:text-xl font-semibold mb-6">
+              {quizList[current].question}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {quizList[current].options.map((option, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                  if (!submitted) {
+                    setSelected(option)
+                    setSubmitted(true)
+                    if (option === quizList[current].correct) {
+                      setScore((prev) => prev + 2)
+                    }
+                  }
+                }}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={handleSubmit}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-bold transition duration-200 text-sm sm:text-base"
+            >
+              {submitted
+                ? current === quizList.length - 1
+                  ? 'Finish Quiz'
+                  : 'Next Question'
+                : 'Submit Answer'}
+            </button>
+          </>
+        ) : (
+          <div className="mt-10 text-center space-y-4">
+            <p className="text-xl sm:text-2xl font-bold text-green-700">🎉 Quiz Completed!</p>
+            <p className="text-lg sm:text-xl">
+              Your Score: <span className="font-bold text-black mr-30">{score} / {quizList.length * 2}</span>
+            </p>
+            <p>
+               <span className="font-semibold text-gray-700">🏅 Player:</span>{' '}
+                <span className="text-blue-700 font-bold">{username}</span>
+            </p>
+            <button
+              onClick={() => window.location.href = '/leaderboard'}
+              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold transition duration-200 text-sm sm:text-base"
+            >
+              View Leaderboard
+            </button>
+          </div>
+        )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Home;
+export default Activity

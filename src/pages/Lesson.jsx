@@ -120,12 +120,11 @@ const Lesson = () => {
 
       <div className="mt-8 text-center">
        <Link 
-  to={`/activity/${id}`}
-  className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 font-semibold px-5 py-3 rounded-lg"
->
-  <span className='text-white'>Take Activity</span> <ArrowRightCircle className="w-5 h-5 text-white" />
-</Link>
-
+        to={`/activity/${id}`}
+        className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 font-semibold px-5 py-3 rounded-lg"
+      >
+        <span className='text-white'>Take Activity</span> <ArrowRightCircle className="w-5 h-5 text-white" />
+      </Link>
       </div>
     </div>
   )
