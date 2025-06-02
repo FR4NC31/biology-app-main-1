@@ -61,8 +61,12 @@ const Home = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white text-black rounded-lg p-6 shadow-xl w-80">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-300 ease-in-out">
+          <div
+            className={`bg-white text-black rounded-lg p-6 shadow-xl w-80 transform transition-all duration-300 ease-in-out
+              ${showModal ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}
+            `}
+          >
             <h2 className="text-lg font-bold mb-4 text-center text-green-700">Enter Your Username</h2>
             <input
               type="text"
@@ -80,7 +84,7 @@ const Home = () => {
               </button>
               <button
                 onClick={() => setShowModal(false)}
-                className="bg-gray-300 text-white px-4 py-2 rounded hover:bg-gray-400 transition"
+                className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition"
               >
                 Cancel
               </button>
