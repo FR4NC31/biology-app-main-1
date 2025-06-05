@@ -10,9 +10,10 @@ const Activity = () => {
   const [selected, setSelected] = useState(null)
   const [score, setScore] = useState(0)
   const [finished, setFinished] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  const [answerSubmitted, setAnswerSubmitted] = useState(false)
   const [showAnswers, setShowAnswers] = useState(false)
 
+  // Quiz data per lesson id
   const quizList = {
     1: [
       { question: 'What is the basic unit of life?', options: ['Atom', 'Cell', 'Tissue', 'Organelle'], correct: 'Cell' },
@@ -46,29 +47,44 @@ const Activity = () => {
     }
   }, [])
 
-  const handleSubmit = async () => {
-    if (selected == null) return
+  // If quizList is undefined (invalid id), render an error message
+  if (!quizList) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-600 text-xl">Invalid lesson ID or quiz not found.</p>
+      </div>
+    )
+  }
 
-    if (!submitted) {
-      setSubmitted(true)
+  const handleAnswerSelect = (option) => {
+    if (answerSubmitted) return // Prevent changing answer after submission
+    setSelected(option)
+  }
+
+  const handleSubmit = async () => {
+    if (selected === null) return // no option selected
+
+    if (!answerSubmitted) {
+      // Submit the answer and update score if correct
       if (selected === quizList[current].correct) {
         setScore((prev) => prev + 2)
       }
+      setAnswerSubmitted(true)
     } else {
+      // Move to next question or finish
       if (current + 1 < quizList.length) {
         setCurrent(current + 1)
         setSelected(null)
-        setSubmitted(false)
+        setAnswerSubmitted(false)
       } else {
         setFinished(true)
-
         if (username) {
           try {
             await push(ref(database, 'leaderboard'), {
               username,
               points: score,
               lessonId: id,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
             })
             console.log('Score saved to leaderboard.')
           } catch (error) {
@@ -98,17 +114,10 @@ const Activity = () => {
               {quizList[current].options.map((option, index) => (
                 <button
                   key={index}
-                  onClick={() => {
-                    if (!submitted) {
-                      setSelected(option)
-                      setSubmitted(true)
-                      if (option === quizList[current].correct) {
-                        setScore((prev) => prev + 2)
-                      }
-                    }
-                  }}
-                  className={`py-3 px-6 rounded-xl font-semibold border text-white bg- black hover:bg-blue-100 transition duration-200 ${
-                    selected === option ? 'bg-blue-500 text-white' : ''
+                  onClick={() => handleAnswerSelect(option)}
+                  disabled={answerSubmitted}
+                  className={`py-3 px-6 rounded-xl font-semibold border text-black hover:bg-blue-100 transition duration-200 ${
+                    selected === option ? 'bg-blue-500 text-white' : 'bg-white'
                   }`}
                 >
                   {option}
@@ -119,18 +128,14 @@ const Activity = () => {
               onClick={handleSubmit}
               className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-bold transition duration-200 text-sm sm:text-base"
             >
-              {submitted
-                ? current === quizList.length - 1
-                  ? 'Finish Quiz'
-                  : 'Next Question'
-                : 'Submit Answer'}
+              {!answerSubmitted ? 'Submit Answer' : current === quizList.length - 1 ? 'Finish Quiz' : 'Next Question'}
             </button>
           </>
         ) : (
           <div className="mt-10 text-center space-y-4">
             <p className="text-xl sm:text-2xl font-bold text-green-700">🎉 Quiz Completed!</p>
             <p className="text-lg sm:text-xl">
-              Your Score: <span className="font-bold text-black">{score} / {quizList.length * 2}</span>
+              Your Score: <span className="font-bold  text-black">{score} / {quizList.length * 2}</span>
             </p>
             <p>
               <span className="font-semibold text-gray-700">🏅 Player:</span>{' '}
@@ -139,7 +144,7 @@ const Activity = () => {
 
             <div className="flex justify-center gap-4 flex-wrap">
               <button
-                onClick={() => window.location.href = '/leaderboard'}
+                onClick={() => window.location.href = '/leaderboard/'}
                 className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold transition duration-200 text-sm sm:text-base"
               >
                 View Leaderboard

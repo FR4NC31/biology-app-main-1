@@ -86,7 +86,7 @@ const Home = () => {
               </button>
               <button
                 onClick={closeModal}
-                className="bg-black text-white px-4 py-2 rounded hover:bg-black transition"
+                className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition"
               >
                 Cancel
               </button>
@@ -99,7 +99,7 @@ const Home = () => {
       <div className="bg-white shadow-2xl rounded-2xl p-8 max-w-xl w-full">
         <h1 className="text-4xl font-bold text-green-700 mb-4 text-center">🌱 Gamified Biology</h1>
         {loggedInUser && (
-          <p className="text-xl text-white bg-black text-center mb-6">
+          <p className="text-xl text-gray-700 text-center mb-6">
             Hello, <span className="font-bold text-green-800">{loggedInUser}</span>!
           </p>
         )}
