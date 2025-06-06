@@ -15,28 +15,78 @@ const Activity = () => {
 
   // Quiz data per lesson id
   const quizList = {
-    1: [
-      { question: 'What is the basic unit of life?', options: ['Atom', 'Cell', 'Tissue', 'Organelle'], correct: 'Cell' },
-      { question: 'Which type of cell does not have a nucleus?', options: ['Plant cell', 'Animal cell', 'Eukaryotic cell', 'Prokaryotic cell'], correct: 'Prokaryotic cell' },
-      { question: 'What is the function of the mitochondria?', options: ['Store genetic material', 'Produce energy', 'Digest food', 'Make proteins'], correct: 'Produce energy' },
-      { question: 'Where is DNA found in a eukaryotic cell?', options: ['Cytoplasm', 'Cell membrane', 'Nucleus', 'Ribosomes'], correct: 'Nucleus' },
-      { question: 'Which organelle is responsible for photosynthesis?', options: ['Ribosomes', 'Mitochondria', 'Chloroplast', 'Golgi body'], correct: 'Chloroplast' },
-    ],
-    2: [
-      { question: 'Who is known as the Father of Modern Genetics?', options: ['Charles Darwin', 'Louis Pasteur', 'Gregor Mendel', 'Rosalind Franklin'], correct: 'Gregor Mendel' },
-      { question: 'What is the genetic material that carries instructions for life?', options: ['RNA', 'Protein', 'Carbohydrates', 'DNA'], correct: 'DNA' },
-      { question: 'Which describes a dominant allele?', options: ['Only shows effect when two copies are present', 'Is weaker than a recessive allele', 'Shows effect even if only one copy is present', 'Only appears in males'], correct: 'Shows effect even if only one copy is present' },
-      { question: 'What tool is used to predict genetic outcomes?', options: ['Microscope', 'Gene scanner', 'Punnett Square', 'Chromosome map'], correct: 'Punnett Square' },
-      { question: 'What combination of sex chromosomes does a male have?', options: ['XX', 'XY', 'YY', 'XO'], correct: 'XY' },
-    ],
-    3: [
-      { question: 'What is heredity?', options: ['Cell division', 'The passing of traits from parents to offspring', 'Mutation of genes', 'Growth of an organism'], correct: 'The passing of traits from parents to offspring' },
-      { question: 'Which molecule carries genetic information?', options: ['RNA', 'ATP', 'DNA', 'Protein'], correct: 'DNA' },
-      { question: 'Who discovered the basic principles of heredity?', options: ['Isaac Newton', 'Gregor Mendel', 'Albert Einstein', 'Louis Pasteur'], correct: 'Gregor Mendel' },
-      { question: 'What term describes a trait influenced by multiple genes?', options: ['Dominant trait', 'Recessive trait', 'Polygenic trait', 'Single-gene trait'], correct: 'Polygenic trait' },
-      { question: 'Which of the following is a hereditary disorder?', options: ['Flu', 'Diabetes Type 2', 'Cystic Fibrosis', 'Allergy'], correct: 'Cystic Fibrosis' },
-    ],
-  }[id]
+  1: [
+    // Multiple Choice
+    {
+      type: 'multiple',
+      question: 'Which of the following is NOT part of the Cell Theory?',
+      options: [
+        'All living things are made of cells',
+        'Cells are the basic unit of life',
+        'All cells come from pre-existing cells',
+        'Cells can live forever without dividing'
+      ],
+      correct: 'Cells can live forever without dividing'
+    },
+    // True or False
+    {
+      type: 'truefalse',
+      question: 'True or False: The mitochondria is responsible for protein synthesis.',
+      correct: 'False'
+    },
+    // Identification
+    {
+      type: 'identification',
+      question: 'Identify the cell part responsible for energy production.',
+      correct: 'Mitochondria'
+    },
+    // Multiple Choice
+    {
+      type: 'multiple',
+      question: 'Which structure controls what enters and leaves the cell?',
+      options: ['Nucleus', 'Cytoplasm', 'Cell membrane', 'Vacuole'],
+      correct: 'Cell membrane'
+    },
+    // True or False
+    {
+      type: 'truefalse',
+      question: 'True or False: Prokaryotic cells have no nucleus.',
+      correct: 'True'
+    },
+    // Identification
+    {
+      type: 'identification',
+      question: 'What type of cell has a cell wall made of chitin?',
+      correct: 'Fungal cell'
+    },
+    // Multiple Choice
+    {
+      type: 'multiple',
+      question: 'Which cell structure is found only in plant cells?',
+      options: ['Ribosome', 'Nucleus', 'Chloroplast', 'Mitochondria'],
+      correct: 'Chloroplast'
+    },
+    // True or False
+    {
+      type: 'truefalse',
+      question: 'True or False: All eukaryotic cells lack membrane-bound organelles.',
+      correct: 'False'
+    },
+    // Identification
+    {
+      type: 'identification',
+      question: 'Name the small finger-like projections that increase surface area for absorption.',
+      correct: 'Microvilli'
+    },
+    // Multiple Choice
+    {
+      type: 'multiple',
+      question: 'Which cell structure is responsible for photosynthesis?',
+      options: ['Mitochondria', 'Nucleus', 'Golgi body', 'Chloroplast'],
+      correct: 'Chloroplast'
+    }
+  ]
+}
 
   useEffect(() => {
     const savedUsername = localStorage.getItem('username')

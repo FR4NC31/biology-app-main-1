@@ -107,9 +107,15 @@ const Home = () => {
           Choose a lesson to start learning and earning points!
         </p>
         <ul className="space-y-4">
-          <li><Link to="/lesson/1" className="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-3 rounded-lg font-medium transition duration-200"><BookOpen className="w-5 h-5" />Lesson 1: Cells</Link></li>
-          <li><Link to="/lesson/2" className="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-3 rounded-lg font-medium transition duration-200"><BookOpen className="w-5 h-5" />Lesson 2: Genetics</Link></li>
-          <li><Link to="/lesson/3" className="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-3 rounded-lg font-medium transition duration-200"><BookOpen className="w-5 h-5" />Lesson 3: Heredity</Link></li>
+          <li>
+            <Link
+              to="/lesson/1"
+              className="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-3 rounded-lg font-medium transition duration-200"
+            >
+              <BookOpen className="w-5 h-5" />
+              Lesson: The Cell — Structure and Function
+            </Link>
+          </li>
           <li><Link to="/leaderboard" className="flex items-center gap-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-4 py-3 rounded-lg font-medium transition duration-200"><Trophy className="w-5 h-5" />View Leaderboard</Link></li>
         </ul>
       </div>
