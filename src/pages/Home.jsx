@@ -54,6 +54,7 @@ const Home = () => {
       localStorage.setItem('username', username);
       setLoggedInUser(username);
       setShowModal(false);
+      setShowUserListModal(false); // close user list if open
     } catch (err) {
       console.error(err);
     }
@@ -132,15 +133,24 @@ const Home = () => {
                 </li>
               ))}
             </ul>
-            <button
-              onClick={() => {
-                closeUserListModal();
-                openModal();
-              }}
-              className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition"
-            >
-              ➕ Create New User
-            </button>
+            <div className="mt-4 space-y-2">
+              <button
+                onClick={() => {
+                  closeUserListModal();
+                  openModal();
+                }}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 pr-6 rounded-lg transition"
+              >
+                ➕ Create New User
+              </button>
+
+              <button
+                onClick={closeUserListModal}
+                className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition"
+              >
+                ❌ Exit
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -173,24 +183,6 @@ const Home = () => {
           </Link>
         </div>
       </div>
-
-      {/* Animations */}
-      <style>{`
-        .animate-fadeIn {
-          animation: fadeIn 0.4s ease;
-        }
-        .animate-scaleIn {
-          animation: scaleIn 0.3s ease;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes scaleIn {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
     </div>
   );
 };
