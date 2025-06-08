@@ -1,33 +1,47 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Trophy } from 'lucide-react';
 import { database } from '../../firebaseConfig';
-import { ref, set, get } from 'firebase/database';
+import { ref, set, get, child } from 'firebase/database';
 
 const Home = () => {
   const [username, setUsername] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [animateModal, setAnimateModal] = useState(false);
+  const [showUserListModal, setShowUserListModal] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState('');
+  const [userList, setUserList] = useState([]);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     const savedUsername = localStorage.getItem('username');
     if (savedUsername) {
       setLoggedInUser(savedUsername);
     } else {
-      openModal();
+      openUserListModal();
     }
   }, []);
 
-  const openModal = () => {
-    setShowModal(true);
-    setTimeout(() => setAnimateModal(true), 10); // delay for transition
+  useEffect(() => {
+    if (showModal && inputRef.current) inputRef.current.focus();
+  }, [showModal]);
+
+  const openModal = () => setShowModal(true);
+  const closeModal = () => setShowModal(false);
+
+  const openUserListModal = async () => {
+    try {
+      const snapshot = await get(child(ref(database), 'users'));
+      if (snapshot.exists()) {
+        setUserList(Object.keys(snapshot.val()));
+      } else {
+        setUserList([]);
+      }
+      setShowUserListModal(true);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const closeModal = () => {
-    setAnimateModal(false);
-    setTimeout(() => setShowModal(false), 300); // match transition duration
-  };
+  const closeUserListModal = () => setShowUserListModal(false);
 
   const handleSubmit = async () => {
     if (!username.trim()) return;
@@ -39,43 +53,49 @@ const Home = () => {
       }
       localStorage.setItem('username', username);
       setLoggedInUser(username);
-      closeModal();
-    } catch (error) {
-      console.error('Error saving user:', error);
+      setShowModal(false);
+    } catch (err) {
+      console.error(err);
     }
   };
 
+  const handleSelectUser = (user) => {
+    localStorage.setItem('username', user);
+    setLoggedInUser(user);
+    closeUserListModal();
+  };
+
   const handleLogout = () => {
-    localStorage.removeItem('username');
-    setLoggedInUser('');
-    setUsername('');
-    openModal();
+    if (confirm('Switch user?')) {
+      localStorage.removeItem('username');
+      setLoggedInUser('');
+      setUsername('');
+      openUserListModal();
+    }
   };
 
   return (
-    <div className="min-h-screen min-w-screen bg-gradient-to-b from-green-100 to-white flex flex-col items-center justify-center p-4 relative">
+    <div className="min-h-screen bg-gradient-to-b from-green-100 to-white flex flex-col items-center justify-center p-4 relative">
+      {/* Top Right Button */}
       <button
-        onClick={loggedInUser ? handleLogout : openModal}
+        onClick={loggedInUser ? handleLogout : openUserListModal}
         className="absolute top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
       >
-        {loggedInUser ? 'Logout' : 'Login'}
+        {loggedInUser ? 'Switch User' : 'Login'}
       </button>
 
-      {/* Modal with transition */}
+      {/* Create User Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div
-            className={`bg-white text-black rounded-lg p-6 shadow-xl w-80 transform transition-all duration-300 ease-in-out
-              ${animateModal ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}
-            `}
-          >
-            <h2 className="text-lg font-bold mb-4 text-center text-green-700">Enter Your Username</h2>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-80 animate-scaleIn">
+            <h2 className="text-xl font-semibold text-center text-green-700 mb-4">Create New User</h2>
             <input
-              type="text"
+              ref={inputRef}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
               placeholder="e.g., BioMaster123"
-              className="w-full p-2 border border-gray-300 rounded mb-4"
+              className="w-full px-3 py-2 border border-gray-300 rounded mb-4 focus:outline-green-500"
             />
             <div className="flex justify-between">
               <button
@@ -95,30 +115,82 @@ const Home = () => {
         </div>
       )}
 
+      {/* User List Modal */}
+      {showUserListModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-80 max-h-[70vh] overflow-y-auto animate-scaleIn">
+            <h2 className="text-xl font-semibold text-center text-green-700 mb-4">Select User</h2>
+            <ul className="space-y-2">
+              {userList.map((user) => (
+                <li key={user}>
+                  <button
+                    onClick={() => handleSelectUser(user)}
+                    className="w-full text-left px-4 py-2 bg-gray-100 hover:bg-green-100 rounded transition"
+                  >
+                    👤 {user}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={() => {
+                closeUserListModal();
+                openModal();
+              }}
+              className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition"
+            >
+              ➕ Create New User
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
-      <div className="bg-white shadow-2xl rounded-2xl p-8 max-w-xl w-full">
-        <h1 className="text-4xl font-bold text-green-700 mb-4 text-center">🌱 Gamified Biology</h1>
+      <div className="bg-white shadow-2xl rounded-2xl p-8 max-w-xl w-full text-center animate-fadeIn">
+        <h1 className="text-4xl font-bold text-green-700 mb-4">🌱 BIO-QUEST ACADEMY</h1>
+
         {loggedInUser && (
-          <p className="text-xl text-gray-700 text-center mb-6">
-            Hello, <span className="font-bold text-green-800">{loggedInUser}</span>!
+          <p className="text-xl text-gray-700 mb-4">
+            Welcome back, <span className="font-bold text-green-800">{loggedInUser}</span>! 🎉
           </p>
         )}
-        <p className="text-gray-700 mb-6 text-center">
-          Choose a lesson to start learning and earning points!
-        </p>
-        <ul className="space-y-4">
-          <li>
-            <Link
-              to="/lesson/1"
-              className="flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-3 rounded-lg font-medium transition duration-200"
-            >
-              <BookOpen className="w-5 h-5" />
-              Lesson: The Cell — Structure and Function
-            </Link>
-          </li>
-          <li><Link to="/leaderboard" className="flex items-center gap-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-4 py-3 rounded-lg font-medium transition duration-200"><Trophy className="w-5 h-5" />View Leaderboard</Link></li>
-        </ul>
+
+        <p className="text-gray-700 mb-6">Choose a lesson to start learning and earning points!</p>
+
+        <div className="space-y-4">
+          <Link
+            to="/lesson"
+            className="block bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-3 rounded-lg font-medium transition duration-200"
+          >
+            🧫 Lesson 1: The Cell — Structure and Function
+          </Link>
+
+          <Link
+            to="/leaderboard"
+            className="block bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-4 py-3 rounded-lg font-medium transition duration-200"
+          >
+            🔬 View Leaderboard
+          </Link>
+        </div>
       </div>
+
+      {/* Animations */}
+      <style>{`
+        .animate-fadeIn {
+          animation: fadeIn 0.4s ease;
+        }
+        .animate-scaleIn {
+          animation: scaleIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
     </div>
   );
 };

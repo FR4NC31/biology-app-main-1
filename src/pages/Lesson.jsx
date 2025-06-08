@@ -1,20 +1,24 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRightCircle } from 'lucide-react'
+import { ArrowRightCircle, ChevronDown, ChevronUp } from 'lucide-react'
 
 const Lesson = () => {
+  const [openIndex, setOpenIndex] = useState(null)
+
   const lesson = {
-    title: 'Lesson: Cells – The Basic Unit of Life',
+    title: 'Lesson: Cells - The Basic Unit of Life',
     sections: [
       {
         heading: '1. Cell Theory',
-        description: `Cell Theory is a basic and important idea in biology that explains what living things are made of and how they function.`,
-        subheading: '🧩 The Three Main Parts of Cell Theory:',
+        description:
+          'Cell Theory is a basic and important idea in biology that explains what living things are made of and how they function.',
+        subheading: 'The Three Main Parts of Cell Theory:',
         bullets: [
           'All living things are made of one or more cells – Every plant, animal, or tiny organism (like bacteria) is made up of cells.',
           'The cell is the basic unit of life – Cells are the smallest part of an organism that can carry out life’s processes.',
           'All cells come from pre-existing cells – New cells are made when old cells divide.'
         ],
-        note: '🧠 Why is Cell Theory important?',
+        note: 'Why is Cell Theory important?',
         subbullets: [
           'It shows that life is organized.',
           'It helps scientists understand diseases, growth, and reproduction.',
@@ -24,7 +28,8 @@ const Lesson = () => {
       },
       {
         heading: '2. Cell Structure and Functions',
-        description: 'A cell is like a tiny factory. Each part (organelle) has a special job to help the cell function properly.',
+        description:
+          'A cell is like a tiny factory. Each part (organelle) has a special job to help the cell function properly.',
         table: {
           headers: ['Cell Part', 'Function (What it does)', 'Found in Plant/Animal?'],
           rows: [
@@ -45,11 +50,12 @@ const Lesson = () => {
       },
       {
         heading: '3. Prokaryotic vs Eukaryotic Cells',
-        description: 'Cells are classified into two major types based on their internal structure: Prokaryotic and Eukaryotic.',
+        description:
+          'Cells are classified into two major types based on their internal structure: Prokaryotic and Eukaryotic.',
         table: {
           headers: ['Feature', 'Prokaryotic Cells', 'Eukaryotic Cells'],
           rows: [
-            ['Nucleus', '❌ No nucleus', '✅ Has nucleus'],
+            ['Nucleus', 'No nucleus', 'Has nucleus'],
             ['Size', 'Small (1-10 µm)', 'Larger (10-100 µm)'],
             ['Complexity', 'Simple', 'Complex'],
             ['Examples', 'Bacteria, Archaea', 'Animals, Plants, Fungi, Protists'],
@@ -62,21 +68,23 @@ const Lesson = () => {
       },
       {
         heading: '4. Cell Types',
-        description: 'Cells differ in structure and function depending on the organism. Here are the major types of cells found in living things:',
+        description:
+          'Cells differ in structure and function depending on the organism. Here are the major types of cells found in living things:',
         table: {
           headers: ['Cell Type', 'Key Features', 'Found In'],
           rows: [
-            ['Animal Cell', '❌ No cell wall, ❌ No chloroplasts, ✅ Small vacuoles', 'Animals'],
-            ['Plant Cell', '✅ Cell wall, ✅ Chloroplasts, ✅ Large central vacuole', 'Plants'],
-            ['Fungal Cell', '✅ Cell wall made of chitin, ❌ No chloroplasts', 'Fungi'],
-            ['Protist Cell', '✅ Unicellular, ✅ Eukaryotic, features vary widely', 'Protists']
+            ['Animal Cell', 'No cell wall, no chloroplasts, small vacuoles', 'Animals'],
+            ['Plant Cell', 'Cell wall, chloroplasts, large central vacuole', 'Plants'],
+            ['Fungal Cell', 'Cell wall made of chitin, no chloroplasts', 'Fungi'],
+            ['Protist Cell', 'Unicellular, eukaryotic, features vary widely', 'Protists']
           ]
         },
         videoUrl: 'https://www.youtube.com/embed/192M4oDLTdc?si=c-LGMD7hZxRE-1pf',
       },
       {
         heading: '5. Cell Modifications',
-        description: 'Some cells have special structures that allow them to perform specific functions efficiently. These modifications help cells adapt to their roles in the body or environment.',
+        description:
+          'Some cells have special structures that allow them to perform specific functions efficiently. These modifications help cells adapt to their roles in the body or environment.',
         table: {
           headers: ['Modification', 'Function', 'Example Cell'],
           rows: [
@@ -94,108 +102,122 @@ const Lesson = () => {
     ]
   }
 
+  const toggleSection = (index) => {
+    setOpenIndex(openIndex === index ? null : index)
+  }
+
   return (
-    <div className="p-6 sm:p-8 min-h-screen bg-gray-100 flex flex-col items-center font-[Arial]">
-      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 text-blue-700 max-w-xl">
+    <div className="p-6 sm:p-8 min-h-screen bg-gradient-to-b from-blue-50 to-white font-sans">
+      <h2 className="text-3xl sm:text-4xl font-bold text-center text-blue-700 mb-10">
         {lesson.title}
       </h2>
 
-      {lesson.sections.map((section, index) => (
-        <div
-          key={index}
-          className="w-full sm:w-3/4 md:w-2/3 lg:w-1/2 mb-8 bg-white p-4 rounded shadow"
-        >
-          <h3 className="text-lg sm:text-xl font-semibold mb-2 text-green-600">{section.heading}</h3>
+      {lesson.sections.map((section, index) => {
+        const isOpen = openIndex === index
 
-          {section.description && (
-            <p className="text-gray-800 text-sm sm:text-base mb-4">{section.description}</p>
-          )}
+        return (
+          <div
+            key={index}
+            className="w-full sm:w-3/4 mx-auto mb-4 bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300"
+          >
+            <button
+              onClick={() => toggleSection(index)}
+              className="w-full text-left p-4 flex items-center justify-between bg-blue-100 hover:bg-blue-200 transition"
+            >
+              <h3 className="text-lg sm:text-xl font-semibold text-blue-800">
+                {section.heading}
+              </h3>
+              {isOpen ? <ChevronUp className="text-blue-800" /> : <ChevronDown className="text-blue-800" />}
+            </button>
 
-          {section.subheading && (
-            <p className="font-bold text-gray-700 mb-1">{section.subheading}</p>
-          )}
+            {/* Transition wrapper always rendered */}
+            <div
+              className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                isOpen ? 'max-h-[2000px] opacity-100 p-4 sm:p-5' : 'max-h-0 opacity-0 p-0'
+              }`}
+            >
+              <div className="text-gray-800 text-sm sm:text-base space-y-4">
+                {section.description && <p>{section.description}</p>}
 
-          {section.bullets && (
-            <ul className="list-disc list-inside text-gray-800 text-sm sm:text-base mb-4">
-              {section.bullets.map((point, idx) => (
-                <li key={idx}>{point}</li>
-              ))}
-            </ul>
-          )}
+                {section.subheading && <p className="font-semibold">{section.subheading}</p>}
 
-          {section.note && (
-            <p className="font-bold text-gray-700 mb-1">{section.note}</p>
-          )}
-
-          {section.subbullets && (
-            <ul className="list-disc list-inside text-gray-800 text-sm sm:text-base mb-4">
-              {section.subbullets.map((point, idx) => (
-                <li key={idx}>{point}</li>
-              ))}
-            </ul>
-          )}
-
-          {section.table && (
-            <div className="overflow-auto">
-              <table className="w-full text-sm text-left border mt-1 mb-5">
-                <thead className="bg-blue-100 text-gray-800">
-                  <tr>
-                    {section.table.headers.map((header, i) => (
-                      <th key={i} className="border px-3 py-2">{header}</th>
+                {section.bullets && (
+                  <ul className="list-disc list-inside space-y-1">
+                    {section.bullets.map((point, idx) => (
+                      <li key={idx}>{point}</li>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {section.table.rows.map((row, i) => (
-                    <tr key={i} className="odd:bg-white even:bg-gray-50">
-                      {row.map((cell, j) => (
-                        <td key={j} className="border px-3 py-2">{cell}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </ul>
+                )}
+
+                {section.note && <p className="font-semibold">{section.note}</p>}
+
+                {section.subbullets && (
+                  <ul className="list-disc list-inside space-y-1">
+                    {section.subbullets.map((point, idx) => (
+                      <li key={idx}>{point}</li>
+                    ))}
+                  </ul>
+                )}
+
+                {section.table && (
+                  <div className="overflow-x-auto border rounded-lg shadow-sm">
+                    <table className="min-w-full text-left border-collapse text-sm sm:text-base">
+                      <thead className="bg-blue-200 text-blue-900">
+                        <tr>
+                          {section.table.headers.map((header, i) => (
+                            <th key={i} className="px-4 py-2 border whitespace-nowrap">{header}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {section.table.rows.map((row, i) => (
+                          <tr key={i} className="odd:bg-white even:bg-gray-50">
+                            {row.map((cell, j) => (
+                              <td key={j} className="px-4 py-2 border whitespace-nowrap">{cell}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {section.videoUrl && (
+                  <div className="w-full aspect-video">
+                    <iframe
+                      src={section.videoUrl}
+                      title={`Video for ${section.heading}`}
+                      className="w-full h-full rounded-lg"
+                      allowFullScreen
+                    />
+                  </div>
+                )}
+
+                {section.imageUrls?.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                    {section.imageUrls.map((url, i) => (
+                      <img
+                        key={i}
+                        src={url}
+                        alt={`Image for ${section.heading}`}
+                        className="w-full h-auto rounded-md shadow-md transition-transform hover:scale-105"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </div>
+        )
+      })}
 
-          {section.text && (
-            <pre className="whitespace-pre-wrap text-gray-800 text-sm sm:text-base mb-4">{section.text}</pre>
-          )}
-
-          {section.videoUrl && (
-            <div className="mb-4">
-              <iframe
-                src={section.videoUrl}
-                title={`Video for ${section.heading}`}
-                className="w-full aspect-video rounded"
-                allowFullScreen
-              ></iframe>
-            </div>
-          )}
-
-          {section.imageUrls?.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {section.imageUrls.map((url, i) => (
-                <img
-                  key={i}
-                  src={url}
-                  alt={`Image for ${section.heading}`}
-                  className="w-full rounded shadow-md"
-                />
-              ))}
-            </div>
-          )}
-
-        </div>
-      ))}
-
-      <div className="mt-5 text-center">
+      <div className="mt-8 text-center">
         <Link
-          to="/activity/1"
-          className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 font-semibold px-5 py-3 rounded-lg"
+          to="/activity"
+          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg shadow-lg transition"
         >
-          <span className="text-white">Take Activity</span>
-          <ArrowRightCircle className="w-5 h-5 text-white" />
+          <span>Take Activity</span>
+          <ArrowRightCircle className="w-5 h-5" />
         </Link>
       </div>
     </div>
