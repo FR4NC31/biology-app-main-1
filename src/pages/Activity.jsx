@@ -1,23 +1,23 @@
-import { useParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import { database } from '../../firebaseConfig'
-import { ref, push } from 'firebase/database'
+import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { database } from '../../firebaseConfig';
+import { ref, push } from 'firebase/database';
 
 const Activity = () => {
-  const { id } = useParams()
-  const [username, setUsername] = useState('')
-  const [current, setCurrent] = useState(0)
-  const [selected, setSelected] = useState(null)
-  const [score, setScore] = useState(0)
-  const [setFinished] = useState(false)
-  const [phase, setPhase] = useState('greeting')
-  const [timer, setTimer] = useState(0)
-  const [showAnswers, setShowAnswers] = useState(false)
-  const [isCorrect, setIsCorrect] = useState(null)
-  const [userAnswers, setUserAnswers] = useState([])
+  const { id } = useParams();
+  const [username, setUsername] = useState('');
+  const [current, setCurrent] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [score, setScore] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const [phase, setPhase] = useState('greeting');
+  const [timer, setTimer] = useState(0);
+  const [showAnswers, setShowAnswers] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(null);
+  const [userAnswers, setUserAnswers] = useState([]);
 
   const quizList = {
-    1: [
+    lesson: [
       { type: 'multiple', question: 'What is the basic unit of life?', options: ['Atom', 'Molecule', 'Cell', 'Organ'], correct: 'Cell' },
       { type: 'multiple', question: 'Which organelle is known as the powerhouse of the cell?', options: ['Nucleus', 'Mitochondria', 'Ribosome', 'Golgi body'], correct: 'Mitochondria' },
       { type: 'multiple', question: 'Which structure controls cell activities?', options: ['Cell wall', 'Ribosome', 'Nucleus', 'Cytoplasm'], correct: 'Nucleus' },
@@ -32,15 +32,15 @@ const Activity = () => {
       { type: 'identification', question: 'What is the jelly-like substance inside the cell?', correct: 'Cytoplasm' },
       { type: 'identification', question: 'Which part acts as the cell’s boundary with its environment?', correct: 'Cell membrane' },
       { type: 'identification', question: 'Which organelle makes proteins?', correct: 'Ribosome' },
-      { type: 'identification', question: 'Which part stores water in plant cells?', correct: 'Vacuole' }
-    ]
-  }
+      { type: 'identification', question: 'Which part stores water in plant cells?', correct: 'Ribosome' },
+    ],
+  };
 
   useEffect(() => {
-    const savedUsername = localStorage.getItem('username')
-    if (savedUsername) setUsername(savedUsername)
-    else alert('No username found. Please log in.')
-  }, [])
+    const savedUsername = localStorage.getItem('username');
+    if (savedUsername) setUsername(savedUsername);
+    else alert('No username found. Please log in.');
+  }, []);
 
   useEffect(() => {
     const phaseDurations = {
@@ -50,53 +50,53 @@ const Activity = () => {
       question: 10,
       answer: 3,
       correct: 3
-    }
-    setTimer(phaseDurations[phase] || 0)
-  }, [phase])
+    };
+    setTimer(phaseDurations[phase] || 0);
+  }, [phase]);
 
   useEffect(() => {
-    if (timer <= 0) return
-    const interval = setInterval(() => setTimer(prev => prev - 1), 1000)
-    return () => clearInterval(interval)
-  }, [timer])
+    if (timer <= 0) return;
+    const interval = setInterval(() => setTimer(prev => prev - 1), 1000);
+    return () => clearInterval(interval);
+  }, [timer]);
 
   useEffect(() => {
-    if (timer === 0) nextPhase()
-  }, [timer])
+    if (timer === 0) nextPhase();
+  }, [timer]);
 
   const nextPhase = () => {
-    const currentQuestion = quizList[id][current]
-    const userAnswer = selected?.toString().trim().toLowerCase()
-    const correctAnswer = currentQuestion?.correct?.toString().trim().toLowerCase()
+    const currentQuestion = quizList[id][current];
+    const userAnswer = selected?.toString().trim().toLowerCase();
+    const correctAnswer = currentQuestion?.correct?.toString().trim().toLowerCase();
 
     switch (phase) {
-      case 'greeting': return setPhase('intro')
-      case 'intro': return setPhase('countdown')
-      case 'countdown': return setPhase('question')
-      case 'question': return setPhase('answer')
+      case 'greeting': return setPhase('intro');
+      case 'intro': return setPhase('countdown');
+      case 'countdown': return setPhase('question');
+      case 'question': return setPhase('answer');
       case 'answer':
-        setIsCorrect(userAnswer === correctAnswer)
-        if (userAnswer === correctAnswer) setScore(prev => prev + 2)
+        setIsCorrect(userAnswer === correctAnswer);
+        if (userAnswer === correctAnswer) setScore(prev => prev + 2);
         setUserAnswers(prev => [...prev, {
           question: currentQuestion.question,
           answer: selected,
           correct: currentQuestion.correct
-        }])
-        return setPhase('correct')
+        }]);
+        return setPhase('correct');
       case 'correct':
         if (current + 1 < quizList[id].length) {
-          setCurrent(prev => prev + 1)
-          setSelected(null)
-          setIsCorrect(null)
-          return setPhase('countdown')
+          setCurrent(prev => prev + 1);
+          setSelected(null);
+          setIsCorrect(null);
+          return setPhase('countdown');
         } else {
-          submitScore()
-          setFinished(true)
-          return setPhase('finished')
+          submitScore();
+          setFinished(true);
+          return setPhase('finished');
         }
-      default: break
+      default: break;
     }
-  }
+  };
 
   const submitScore = async () => {
     try {
@@ -105,139 +105,284 @@ const Activity = () => {
         points: score,
         lessonId: id,
         timestamp: new Date().toISOString()
-      })
+      });
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
-  }
+  };
 
-  const currentQuestion = quizList[id][current]
+  const currentQuestion = quizList[id][current];
 
-  const renderProgressBar = (duration) => (
-    <div className="w-full bg-gray-300 h-3 rounded-full overflow-hidden mb-4">
-      <div
-        className={`h-full rounded-full transition-[width] duration-[0ms] ${phase === 'question' ? 'bg-blue-500' : 'bg-yellow-400'}`}
-        style={{
-          width: `${((duration - timer) / duration) * 100}%`,
-          transitionDuration: `${(timer === duration) ? '0ms' : '1000ms'}`
-        }}
-      />
-    </div>
-  )
-
-  const renderPhase = () => {
-    switch (phase) {
-      case 'greeting': return <p className="text-3xl text-blue-600 animate-bounce">👋 Welcome {username}!</p>
-      case 'intro': return <p className="text-xl text-gray-800 animate-fade-in">Get ready! Multiple question types await. Good luck!</p>
-      case 'countdown': return <p className="text-2xl text-purple-600 font-bold animate-pulse">Starting in... {timer}s</p>
-      case 'question':
-        return (
-          <div className="w-full animate-fade-in">
-            {renderProgressBar(10)}
-            <div className="text-left mb-4">
-              <p className="text-sm text-gray-500">Question {current + 1} of {quizList[id].length}</p>
-              <p className="text-lg font-bold text-black">{currentQuestion.question}</p>
-            </div>
-            {currentQuestion.options ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {currentQuestion.options.map((option, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelected(option)}
-                    className={`py-2 px-4 border rounded-xl transition-colors duration-300 ease-in-out ${selected === option ? 'bg-blue-600 text-white' : 'bg-white hover:bg-blue-100'}`}
-                  >{option}</button>
-                ))}
-              </div>
-            ) : (
-              <input
-                type="text"
-                value={selected || ''}
-                onChange={(e) => setSelected(e.target.value)}
-                className="w-full p-2 border rounded"
-                placeholder="Type your answer here"
-              />
-            )}
-            <p className="mt-4 text-sm text-gray-500">You have {timer}s to answer</p>
-            <button
-              onClick={nextPhase}
-              disabled={!selected}
-              className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full font-bold disabled:bg-gray-400"
-            >Submit Answer</button>
-          </div>
-        )
-      case 'answer':
-        return (
-          <div className="w-full">
-            {renderProgressBar(3)}
-            <p className="text-yellow-600 font-bold animate-pulse">⏳ Checking answer...</p>
-          </div>
-        )
-      case 'correct':
-        return (
-          <div className="text-xl font-bold animate-fade-in space-y-4">
-            {isCorrect
-              ? <p className="text-green-600">✅ Correct!</p>
-              : <p className="text-red-600">❌ Incorrect. Correct answer: {currentQuestion.correct}</p>}
-            {currentQuestion.options && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {currentQuestion.options.map((option, i) => {
-                  const lowerOption = option.toLowerCase()
-                  const lowerCorrect = currentQuestion.correct.toLowerCase()
-                  const lowerSelected = selected?.toLowerCase()
-                  let bg = 'bg-white'
-                  if (lowerOption === lowerCorrect) bg = 'bg-green-300'
-                  else if (lowerOption === lowerSelected) bg = 'bg-red-300'
-                  return (
-                    <div
-                      key={i}
-                      className={`py-2 px-4 border rounded-xl transition-colors duration-300 ease-in-out ${bg}`}
-                    >{option}</div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )
-      case 'finished':
-        return (
-          <div className="text-center space-y-4">
-            <p className="text-2xl font-bold text-green-700">🎉 Quiz Completed!</p>
-            <p className="text-lg">Score: <span className="font-bold text-black">{score} / {quizList[id].length * 2}</span></p>
-            <div className="flex flex-wrap justify-center gap-2">
-              <button onClick={() => (window.location.href = '/leaderboard/' + id)} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full font-bold">View Leaderboard</button>
-              <button onClick={() => setShowAnswers(!showAnswers)} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-bold">{showAnswers ? 'Hide' : 'Show'} Your Answers</button>
-              <button onClick={() => window.location.reload()} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold">🔄 Try Again</button>
-            </div>
-            {showAnswers && (
-              <div className="text-left mt-4 text-sm bg-gray-50 border border-gray-200 rounded-lg p-4">
-                {userAnswers.map((a, i) => (
-                  <div key={i} className="mb-2">
-                    <strong>Q{i + 1}:</strong> {a.question}<br />
-                    <span className="ml-4">Your Answer: <span className="text-blue-700">{a.answer}</span></span><br />
-                    <span className="ml-4">Correct: <span className="text-green-700">{a.correct}</span></span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )
-      default:
-        return null
-    }
-  }
-
+  // Previous design: centered, simpler colors, no gradient background, cleaner buttons, etc.
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 flex items-center justify-center px-4 py-8">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-2xl text-center">
-        <h2 className="text-2xl font-extrabold mb-2 text-blue-700">Lesson {id} - Quiz</h2>
-        <p className="mb-2 text-gray-700">👤 {username}</p>
-        <p className="mb-6 text-gray-700">🏆 Score: {score} / {quizList[id].length * 2}</p>
-        <div className="min-h-[200px] flex flex-col items-center justify-center transition-opacity duration-500 ease-in-out">
-          {renderPhase()}
+    <div style={{ minHeight: '100vh', backgroundColor: '#f4f4f4', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+      <div style={{ backgroundColor: 'white', padding: 30, borderRadius: 15, width: '100%', maxWidth: 700, boxShadow: '0 8px 16px rgba(0,0,0,0.1)' }}>
+        <h1 style={{ fontSize: 28, fontWeight: '700', color: '#2c3e50', marginBottom: 10 }}>
+         Lesson - Quiz
+        </h1>
+        <p style={{ fontSize: 16, color: '#34495e', marginBottom: 5 }}>
+          👤 {username}
+        </p>
+        <p style={{ fontSize: 16, color: '#34495e', marginBottom: 20 }}>
+          🏆 Score: {score} / {quizList[id].length * 2}
+        </p>
+
+        {/* Timer bar */}
+          <div style={{ backgroundColor: '#ddd', borderRadius: 10, overflow: 'hidden', height: 12, marginBottom: 20 }}>
+            <div
+              style={{
+                height: '100%',
+                width: `${
+                  phase === 'question'
+                    ? ((10 - timer) / 10) * 100
+                    : ((3 - timer) / 3) * 100
+                }%`,
+                backgroundColor: phase === 'question' ? '#2980b9' : '#f39c12',
+                transition: timer === (phase === 'question' ? 10 : 3) ? 'none' : 'width 1s linear',
+              }}
+            />
+          </div>
+
+
+        {/* Phase UI */}
+        <div style={{ minHeight: 180, textAlign: 'center' }}>
+          {phase === 'greeting' && (
+            <p style={{ fontSize: 26, color: '#2980b9', animation: 'bounce 1.5s infinite' }}>👋 Welcome {username}!</p>
+          )}
+          {phase === 'intro' && (
+            <p style={{ fontSize: 18, color: '#7f8c8d' }}>
+              Get ready! Multiple question types await. Good luck!
+            </p>
+          )}
+          {phase === 'countdown' && (
+            <p style={{ fontSize: 22, fontWeight: '700', color: '#8e44ad' }}>
+              Starting in... {timer}s
+            </p>
+          )}
+          {phase === 'question' && (
+            <>
+              <p style={{ fontSize: 14, color: '#95a5a6' }}>
+                Question {current + 1} of {quizList[id].length}
+              </p>
+              <p style={{ fontSize: 20, fontWeight: '700', color: '#2c3e50', marginBottom: 15 }}>
+                {currentQuestion.question}
+              </p>
+
+              {currentQuestion.options ? (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, maxWidth: 500, margin: '0 auto' }}>
+                  {currentQuestion.options.map((option, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelected(option)}
+                      style={{
+                        padding: '10px 20px',
+                        borderRadius: 10,
+                        border: '2px solid #2980b9',
+                        backgroundColor: selected === option ? '#2980b9' : 'white',
+                        color: selected === option ? 'white' : '#2980b9',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.3s, color 0.3s',
+                        userSelect: 'none',
+                      }}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  value={selected || ''}
+                  onChange={e => setSelected(e.target.value)}
+                  placeholder="Type your answer here"
+                  style={{
+                    width: '80%',
+                    padding: 10,
+                    borderRadius: 8,
+                    border: '2px solid #2980b9',
+                    fontSize: 16,
+                    marginTop: 15,
+                    outline: 'none',
+                  }}
+                />
+              )}
+
+              <p style={{ marginTop: 10, color: '#7f8c8d', fontSize: 14 }}>
+                You have {timer}s to answer
+              </p>
+
+              <button
+                onClick={nextPhase}
+                disabled={!selected}
+                style={{
+                  marginTop: 20,
+                  padding: '12px 28px',
+                  borderRadius: 25,
+                  border: 'none',
+                  backgroundColor: selected ? '#2980b9' : '#bdc3c7',
+                  color: 'white',
+                  fontWeight: '700',
+                  cursor: selected ? 'pointer' : 'not-allowed',
+                  transition: 'background-color 0.3s',
+                  userSelect: 'none',
+                }}
+              >
+                Submit Answer
+              </button>
+            </>
+          )}
+          {phase === 'answer' && (
+            <p style={{ fontSize: 20, color: '#f39c12', fontWeight: '700' }}>
+              ⏳ Checking answer...
+            </p>
+          )}
+          {phase === 'correct' && (
+            <div>
+              {isCorrect ? (
+                <p style={{ fontSize: 22, fontWeight: '700', color: '#27ae60' }}>✅ Correct!</p>
+              ) : (
+                <p style={{ fontSize: 22, fontWeight: '700', color: '#c0392b' }}>
+                  ❌ Incorrect. Correct answer: {currentQuestion.correct}
+                </p>
+              )}
+
+              {currentQuestion.options && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, maxWidth: 500, margin: '20px auto 0 auto' }}>
+                  {currentQuestion.options.map((option, i) => {
+                    const lowerOption = option.toLowerCase();
+                    const lowerCorrect = currentQuestion.correct.toLowerCase();
+                    const lowerSelected = selected?.toLowerCase();
+                    let bgColor = 'white';
+                    if (lowerOption === lowerCorrect) bgColor = '#27ae60aa';
+                    else if (lowerOption === lowerSelected) bgColor = '#c0392baa';
+
+                    return (
+                      <div
+                        key={i}
+                        style={{
+                          padding: '10px 15px',
+                          borderRadius: 10,
+                          border: '2px solid #2980b9',
+                          backgroundColor: bgColor,
+                          fontWeight: '600',
+                          color: '#2c3e50',
+                          userSelect: 'none',
+                        }}
+                      >
+                        {option}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+          {phase === 'finished' && (
+            <div>
+              <p style={{ fontSize: 28, fontWeight: '700', color: '#27ae60' }}>
+                🎉 Quiz Completed!
+              </p>
+              <p style={{ fontSize: 20, marginTop: 10 }}>
+                Score: <strong>{score} / {quizList[id].length * 2}</strong>
+              </p>
+
+              <div style={{ marginTop: 20, display: 'flex', justifyContent: 'center', gap: 15, flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => window.location.href = '/leaderboard'}
+                  style={{
+                    padding: '12px 28px',
+                    borderRadius: 25,
+                    border: 'none',
+                    backgroundColor: '#2980b9',
+                    color: 'white',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                >
+                  View Leaderboard
+                </button>
+
+                <button
+                  onClick={() => setShowAnswers(!showAnswers)}
+                  style={{
+                    padding: '12px 28px',
+                    borderRadius: 25,
+                    border: 'none',
+                    backgroundColor: '#27ae60',
+                    color: 'white',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                >
+                  {showAnswers ? 'Hide' : 'Show'} Your Answers
+                </button>
+
+                <button
+                  onClick={() => window.location.reload()}
+                  style={{
+                    padding: '12px 28px',
+                    borderRadius: 25,
+                    border: 'none',
+                    backgroundColor: '#8e44ad',
+                    color: 'white',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                >
+                  🔄 Try Again
+                </button>
+              </div>
+
+                {showAnswers && (
+                <div
+                  style={{
+                    marginTop: 30,
+                    backgroundColor: '#ecf0f1',
+                    borderRadius: 15,
+                    padding: 20,
+                    maxHeight: 300,
+                    overflowY: 'auto',
+                    fontSize: 16,
+                    color: '#34495e',
+                  }}
+                >
+                  <h3 style={{ marginBottom: 15 }}>📝 Your Answers:</h3>
+                  <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
+                    {userAnswers.map((ans, index) => (
+                      <li
+                        key={index}
+                        style={{
+                          marginBottom: 12,
+                          padding: 10,
+                          borderRadius: 10,
+                          backgroundColor:
+                            ans.answer?.toString().trim().toLowerCase() ===
+                            ans.correct?.toString().trim().toLowerCase()
+                              ? '#dff0d8'
+                              : '#f2dede',
+                          border: '1px solid #ccc',
+                        }}
+                      >
+                        <strong>Q{index + 1}:</strong> {ans.question}
+                        <br />
+                        <strong>Your Answer:</strong> {ans.answer}
+                        <br />
+                        <strong>Correct Answer:</strong> {ans.correct}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Activity
+export default Activity;
